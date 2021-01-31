@@ -129,4 +129,4 @@ dmypy.json
 .pyre/
 
 # Images for testing
-killua.jpg
+images/
