@@ -17,5 +17,5 @@
    ```
 4. Run boxdraw
    ```sh
-   python boxdraw.py
+   python draw.py
    ```
