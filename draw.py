@@ -1,29 +1,36 @@
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 import matplotlib as mpl
-import numpy as np
+from matplotlib.patches import Rectangle
 import sys
 from matplotlib.widgets import RectangleSelector
 
 def main():
 
     def line_select_callback(eclick, erelease):
+
         """
         Callback for line selection.
 
         *eclick* and *erelease* are the press and release events.
         """
-        x1, y1 = eclick.xdata, eclick.ydata
-        x2, y2 = erelease.xdata, erelease.ydata
-        print(f"({x1:3.2f}, {y1:3.2f}) --> ({x2:3.2f}, {y2:3.2f})")
+        coord[0], coord[1] = eclick.xdata, eclick.ydata
+        coord[2], coord[3] = erelease.xdata, erelease.ydata
 
     def toggle_selector(event):
         if event.key == 't':
             if RS.active:
-                print(' RectangleSelector deactivated.')
+                print(f"TOP LEFT: ({coord[0]:3.2f}, {coord[1]:3.2f}) --> BOTTOM RIGHT: ({coord[2]:3.2f}, {coord[3]:3.2f})")
+                print("Box confirmed. Press \'t\' to draw another box.")
+
+                # Draw confirmed box
+                rect = Rectangle((coord[0],coord[1]),coord[2]-coord[0],coord[3]-coord[1],linewidth=1,edgecolor='r',facecolor='none')
+                ax.add_patch(rect)
+                plt.draw()
+
                 RS.set_active(False)
             else:
-                print(' RectangleSelector activated.')
+                print("Drawing mode activated.")
                 RS.set_active(True)
 
     # Get paths to RGB and depth image
@@ -47,16 +54,16 @@ def main():
         fig, ax = plt.subplots()
         ax.set_title(
             "Click and drag to draw a rectangle.\n"
-            "Press 't' to toggle the selector on and off.")
-        # drawtype is 'box' or 'line' or 'none'
+            "Press 't' to confirm box")
+        coord = [0,0,0,0] # [x1, y1, x2, y2]
         RS = RectangleSelector(ax, line_select_callback,
                                             drawtype='box', useblit=True,
                                             button=[1],  # only draw using left click
                                             minspanx=5, minspany=5,
+                                            rectprops=dict(edgecolor="red", alpha=1, fill=False),
                                             spancoords='pixels',
                                             interactive=True)
         fig.canvas.mpl_connect('key_press_event', toggle_selector)
-
         imgplot = plt.imshow(rgb_img)
         plt.show()
     except:
