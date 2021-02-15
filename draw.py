@@ -20,7 +20,9 @@ def main():
         depth_coord[2], depth_coord[3] = rgb_coord[2]*scale_w, rgb_coord[3]*scale_h
 
 
-    #def saveCoords():
+    def saveCoords():
+        rgb_coord_list.append(rgb_coord.copy())
+        depth_coord_list.append(depth_coord.copy())
 
     def toggle_selector(event):
         if event.key == 't':
@@ -34,9 +36,9 @@ def main():
 
                     # Draw confirmed box
                     rect = Rectangle((rgb_coord[0],rgb_coord[1]),rgb_coord[2]-rgb_coord[0],rgb_coord[3]-rgb_coord[1],linewidth=1,edgecolor='r',facecolor='none')
-                    ax.add_patch(rect)
+                    rgb_ax.add_patch(rect)
                     plt.draw()
-
+                    
                     saveCoords()
 
                     #Reset coordinates and deactivate draw mode
@@ -57,6 +59,12 @@ def main():
     # Start drawing
     try:
 
+        rgb_coord = [0,0,0,0] # [x1, y1, x2, y2]
+        depth_coord = [0,0,0,0]
+
+        rgb_coord_list = []
+        depth_coord_list = []
+
         #Disable toolbar on UI
         mpl.rcParams['toolbar'] = 'None'
 
@@ -69,28 +77,36 @@ def main():
         depth_h, depth_w = depth_img.shape[0], depth_img.shape[1]
         scale_h, scale_w = depth_h/rgb_h, depth_w/rgb_w
 
-        print(scale_h)
-        print(scale_w)
-
-        fig, ax = plt.subplots()
-        ax.set_title(
+        rgb_fig, rgb_ax = plt.subplots()
+        rgb_fig.canvas.set_window_title("RGB Image")
+        plt.imshow(rgb_img)
+        rgb_ax.set_title(
             "Click and drag to draw a rectangle.\n"
             "Press 't' to confirm box")
-        rgb_coord = [0,0,0,0] # [x1, y1, x2, y2]
-        depth_coord = [0,0,0,0]
-        RS = RectangleSelector(ax, line_select_callback,
+        RS = RectangleSelector(rgb_ax, line_select_callback,
                                             drawtype='box', useblit=True,
                                             button=[1],  # only draw using left click
                                             minspanx=5, minspany=5,
                                             rectprops=dict(edgecolor="red", alpha=1, fill=False),
                                             spancoords='pixels',
                                             interactive=True)
-        fig.canvas.mpl_connect('key_press_event', toggle_selector)
-        imgplot = plt.imshow(rgb_img)
+        rgb_fig.canvas.mpl_connect('key_press_event', toggle_selector)
         plt.show()
+
+        # Show resulting depth image
+        depth_fig, depth_ax = plt.subplots()
+        depth_fig.canvas.set_window_title("Depth Image")
+        plt.imshow(depth_img)
+        for coord in depth_coord_list:
+            rect = Rectangle((coord[0],coord[1]),coord[2]-coord[0],coord[3]-coord[1],linewidth=1,edgecolor='r',facecolor='none')
+            depth_ax.add_patch(rect)
+        plt.show()
+
     except:
         print("Path not correct or image not found")
         exit()
+
+    
 
     print("Finished!")
 
