@@ -14,21 +14,34 @@ def main():
 
         *eclick* and *erelease* are the press and release events.
         """
-        coord[0], coord[1] = eclick.xdata, eclick.ydata
-        coord[2], coord[3] = erelease.xdata, erelease.ydata
+        rgb_coord[0], rgb_coord[1] = eclick.xdata, eclick.ydata
+        rgb_coord[2], rgb_coord[3] = erelease.xdata, erelease.ydata
+        depth_coord[0], depth_coord[1] = rgb_coord[0]*scale_w, rgb_coord[1]*scale_h
+        depth_coord[2], depth_coord[3] = rgb_coord[2]*scale_w, rgb_coord[3]*scale_h
+
+
+    #def saveCoords():
 
     def toggle_selector(event):
         if event.key == 't':
             if RS.active:
-                print(f"TOP LEFT: ({coord[0]:3.2f}, {coord[1]:3.2f}) --> BOTTOM RIGHT: ({coord[2]:3.2f}, {coord[3]:3.2f})")
-                print("Box confirmed. Press \'t\' to draw another box.")
+                if sum(rgb_coord) == 0:
+                    print("No box detected. Please draw a box.")
+                else:
+                    print(f"RGB IMAGE: \n TOP LEFT: ({rgb_coord[0]:3.2f}, {rgb_coord[1]:3.2f}) --> BOTTOM RIGHT: ({rgb_coord[2]:3.2f}, {rgb_coord[3]:3.2f})")
+                    print(f"DEPTH IMAGE: \n TOP LEFT: ({depth_coord[0]:3.2f}, {depth_coord[1]:3.2f}) --> BOTTOM RIGHT: ({depth_coord[2]:3.2f}, {depth_coord[3]:3.2f})")
+                    print("Box confirmed. Press \'t\' to draw another box.")
 
-                # Draw confirmed box
-                rect = Rectangle((coord[0],coord[1]),coord[2]-coord[0],coord[3]-coord[1],linewidth=1,edgecolor='r',facecolor='none')
-                ax.add_patch(rect)
-                plt.draw()
+                    # Draw confirmed box
+                    rect = Rectangle((rgb_coord[0],rgb_coord[1]),rgb_coord[2]-rgb_coord[0],rgb_coord[3]-rgb_coord[1],linewidth=1,edgecolor='r',facecolor='none')
+                    ax.add_patch(rect)
+                    plt.draw()
 
-                RS.set_active(False)
+                    saveCoords()
+
+                    #Reset coordinates and deactivate draw mode
+                    for i in range(4): rgb_coord[i] = 0
+                    RS.set_active(False)
             else:
                 print("Drawing mode activated.")
                 RS.set_active(True)
@@ -51,11 +64,20 @@ def main():
         rgb_img = mpimg.imread(rgb_img_str)
         depth_img = mpimg.imread(depth_img_str)
 
+        # Get image dimensions and scale
+        rgb_h, rgb_w = rgb_img.shape[0], rgb_img.shape[1]
+        depth_h, depth_w = depth_img.shape[0], depth_img.shape[1]
+        scale_h, scale_w = depth_h/rgb_h, depth_w/rgb_w
+
+        print(scale_h)
+        print(scale_w)
+
         fig, ax = plt.subplots()
         ax.set_title(
             "Click and drag to draw a rectangle.\n"
             "Press 't' to confirm box")
-        coord = [0,0,0,0] # [x1, y1, x2, y2]
+        rgb_coord = [0,0,0,0] # [x1, y1, x2, y2]
+        depth_coord = [0,0,0,0]
         RS = RectangleSelector(ax, line_select_callback,
                                             drawtype='box', useblit=True,
                                             button=[1],  # only draw using left click
