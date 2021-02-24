@@ -16,8 +16,8 @@ def main():
         """
         rgb_coord[0], rgb_coord[1] = eclick.xdata, eclick.ydata
         rgb_coord[2], rgb_coord[3] = erelease.xdata, erelease.ydata
-        depth_coord[0], depth_coord[1] = rgb_coord[0]*scale_w, rgb_coord[1]*scale_h
-        depth_coord[2], depth_coord[3] = rgb_coord[2]*scale_w, rgb_coord[3]*scale_h
+        depth_coord[0], depth_coord[1] = rgb_coord[0]*scale_w-2, rgb_coord[1]*scale_h
+        depth_coord[2], depth_coord[3] = rgb_coord[2]*scale_w-2, rgb_coord[3]*scale_h
 
 
     def saveCoords():
