@@ -10,13 +10,15 @@
 3. Set up and activate virtual environment
    ```sh
    python -m venv env
-   source env/bin/activate
+   source env/Scripts/activate
    ```
-4. Install packages
+4. Navigate to the fishsense-bowdraw folder
+
+5. Install packages
    ```sh
    pip install -r requirements.txt
    ```
-5. Run boxdraw
+6. Run boxdraw
    ```sh
    python draw.py rgb_img_name depth_img_name
    ```
